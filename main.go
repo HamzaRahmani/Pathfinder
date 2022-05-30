@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
-	"net/http"
-	
+
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 
@@ -18,6 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	_ "go.mongodb.org/mongo-driver/mongo/readpref"
 )
+
 var client *mongo.Client
 
 type MonthEntry struct {
@@ -44,37 +45,37 @@ type User struct {
 }
 
 type Config struct {
-	Username     string `json:"dbUser"`
-	Password     string `json:"dbPass"`
-	ClusterName  string `json:"cluster"`
-	MongoURI string `json:"mongoURI"`
+	Username    string `json:"dbUser"`
+	Password    string `json:"dbPass"`
+	ClusterName string `json:"cluster"`
+	MongoURI    string `json:"mongoURI"`
 }
 
 func LoadConfiguration() (Config, error) {
 	var config Config
 	configFile, err := os.Open("config.json")
-	
+
 	defer configFile.Close()
 	if err != nil {
 		return config, err
 	}
 	parse := json.NewDecoder(configFile)
 	err = parse.Decode(&config)
-	
+
 	return config, err
 }
 
-func userSignupEndpoint(c *gin.Context){
+func userSignupEndpoint(c *gin.Context) {
 	var user User
 
-	if err := c.BindJSON(&user);err!=nil{
+	if err := c.BindJSON(&user); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest,
 			gin.H{
-				"error": "VALIDATEERR-1",
+				"error":   "VALIDATEERR-1",
 				"message": "Invalid inputs. Please check your inputs"})
 		return
 	}
-	
+
 	userCollection := client.Database("myDB").Collection("users")
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
@@ -86,21 +87,21 @@ func userSignupEndpoint(c *gin.Context){
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError,
 			gin.H{
-				"error": "Failed to write to db",
+				"error":   "Failed to write to db",
 				"message": "Please check your inputs"})
 		return
 	}
 
 	c.JSON(http.StatusAccepted, result)
 }
-func userLoginEndpoint(c *gin.Context){
-	
+func userLoginEndpoint(c *gin.Context) {
+
 	var inputUser User
-	
-	if err := c.BindJSON(&inputUser);err!=nil{
+
+	if err := c.BindJSON(&inputUser); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest,
 			gin.H{
-				"error": "VALIDATEERR-1",
+				"error":   "VALIDATEERR-1",
 				"message": "Invalid inputs. Please check your inputs"})
 		return
 	}
@@ -116,19 +117,19 @@ func userLoginEndpoint(c *gin.Context){
 	if err := bcrypt.CompareHashAndPassword([]byte(matchedUser.Password), []byte(inputUser.Password)); err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized,
 			gin.H{
-				"error": "Not Authorized",
+				"error":   "Not Authorized",
 				"message": "Username or Password incorrect"})
 		return
 	}
 	c.JSON(http.StatusAccepted, matchedUser)
 }
-func createMonthEntryEndpoint(c *gin.Context){
+func createMonthEntryEndpoint(c *gin.Context) {
 
 }
-func createDayEntryEndpoint(c *gin.Context){
+func createDayEntryEndpoint(c *gin.Context) {
 
 }
-func getEntryEndpoint(c *gin.Context){
+func getEntryEndpoint(c *gin.Context) {
 
 }
 
@@ -152,7 +153,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	defer client.Disconnect(ctx)
 
 	router := gin.Default()
@@ -166,5 +167,3 @@ func main() {
 
 	router.Run(":8080")
 }
-
-
