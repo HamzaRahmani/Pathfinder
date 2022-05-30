@@ -123,13 +123,13 @@ func userLoginEndpoint(c *gin.Context) {
 	}
 	c.JSON(http.StatusAccepted, matchedUser)
 }
-func createMonthEntryEndpoint(c *gin.Context) {
+func createMonthEntry(c *gin.Context) {
 
 }
-func createDayEntryEndpoint(c *gin.Context) {
+func createDayEntry(c *gin.Context) {
 
 }
-func getEntryEndpoint(c *gin.Context) {
+func getEntry(c *gin.Context) {
 
 }
 
@@ -161,9 +161,9 @@ func main() {
 	router.GET("/user", userLoginEndpoint)
 	router.POST("/user", userSignupEndpoint)
 
-	router.GET("/entry/{id}", getEntryEndpoint)
-	router.POST("/entry/month", createMonthEntryEndpoint)
-	router.POST("/entry/day/{id}", createDayEntryEndpoint)
+	router.GET("/entry/{id}", getEntry)
+	router.POST("/entry/month", createMonthEntry)
+	router.POST("/entry/day/{id}", createDayEntry)
 
 	router.Run(":8080")
 }
